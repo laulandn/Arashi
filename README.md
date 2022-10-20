@@ -9,6 +9,10 @@ What do you think? Are you interested in this project? I’ll upload what change
 --VMSZealot @ https://macintoshgarden.org/
 
 
+This repo is a fork of the 1.1.1 codebase that has been modified to no longer require 256 color mode.
+
+It currently uses only basic QuickDraw to draw in black and white.  Not all Color QuickDraw code has been removed yet, so it still requires machines with Color QuickDraw in their ROMs.
+
 
 The following is from the original README.md:
 
