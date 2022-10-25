@@ -1,0 +1,5 @@
+//
+// Prefix header for all source files of the 'arashi' target in the 'arashi' project.
+//
+
+#include <Carbon/Carbon.h>
