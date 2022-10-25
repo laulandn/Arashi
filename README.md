@@ -16,6 +16,7 @@ This repo is a fork of the 1.1.1 codebase that has been modified to no longer re
 Files: Arashi 1.1.1 with modifications, compiles with Symantec C++ 7
 
 arashi-1.1.1-nl.img: DiskCopy 6 image of Arashi 1.1.1 and Symantec C++ 7.
+
 mvm-arashi-1.1.1-nl.dsk.zip: Mini vMac system disk image with same contents.
 
 ======
