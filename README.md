@@ -11,8 +11,22 @@ What do you think? Are you interested in this project? I’ll upload what change
 
 This repo is a fork of the 1.1.1 codebase that has been modified to no longer require 256 color mode.
 
+
+Files: Arashi 1.1.1 with modifications, compiles with Symantec C++ 7
+
+arashi-1.1.1-nl.img: DiskCopy 6 image of Arashi 1.1.1 and Symantec C++ 7.
+mvm-arashi-1.1.1-nl.dsk.zip: Mini vMac system disk image with same contents.
+
+
+NOTE: There is a separate older Arashi 1.1 tree that may (or may not) run better on older systems.  You can replace the VA Kit folder using the same one as 1.1.1 here and build it with Think C 5.  I'll include disk images of it here soon.
+
+
 It currently uses only basic QuickDraw to draw in black and white.  Not all Color QuickDraw code has been removed yet, so it still requires machines with Color QuickDraw in their ROMs.
 
+Many many bugs remain and this is a work in progress...
+
+
+======
 
 The following is from the original README.md:
 
