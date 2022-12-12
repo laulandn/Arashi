@@ -32,9 +32,13 @@ Many many bugs remain and this is a work in progress...
 Prebuilt binaries included in image(s):
 
 Arashi1.1.1: Original unpatched from macintoshgarden.org
+
 Arashi1.1.1bw: Whatever my latest build is, may be unstable/crash.
+
 Arashi1.1.1bw_1bit: "New" graphics routines only runs on 1 bit depth screens.
+
 Arashi1.1.1bw_8bit: "New" graphics routines only runs on 8 bit depth screens.
+
 Arashi1.1.1bw_qd: Pure QuickDraw, should run on any hardware, but much slower.
 
 ======
