@@ -1,4 +1,4 @@
-Calling all Programmers - Arashi in black and white
+Calling all Programmers - Arashi in black and white 
 ======
 
 "I’ve been playing with trying to get Arashi running on my SE/30. I can get it to build okay, and even not to die with an error when I run in in Black & White mode - but I can’t actually get it to display anything on screen either.
