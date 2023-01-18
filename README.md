@@ -33,7 +33,7 @@ Prebuilt binaries included in image(s):
 
 Arashi1.1.1: Original unpatched from macintoshgarden.org
 
-Arashi1.1.1bw: Whatever my latest build is, will tend to be unstable.
+Arashi1.1.1bw: Whatever my latest build is, may be unstable/crash.
 
 Arashi1.1.1bw_1bit: "New" graphics routines only runs on 1 bit depth screens.
 
