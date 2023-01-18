@@ -1,0 +1,14 @@
+on: 
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repo to Dataverse 
+        uses: IQSS/dataverse-uploader@v1.3
+        with:
+          DATAVERSE_TOKEN: 38d5ced0-84f2-4e56-8213-8a8adc139d9e
+          DATAVERSE_SERVER: https://dataverse-training.tdl.org
+          DATAVERSE_DATASET_DOI: doi:10.33536/FK2/AUT34N
