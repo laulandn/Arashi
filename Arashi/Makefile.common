@@ -1,0 +1,520 @@
+# This file is used by multiple projects,
+# When modifying be sure to update central copy!
+
+####################################################################
+# Makefile.common
+####################################################################
+
+VERSION=1.0
+
+DIST_GOES_HERE=.
+
+#VERBOSE=-v
+
+#EXTRA_FLAGS=-m32
+#EXTRA_LDFLAGS=-m32
+#EXTRA_LDFLAGS=-lsocket -lnsl
+
+
+####################################################################
+# Common rules and definitions
+####################################################################
+
+# Common GNU stuff...
+CL=$(CC)
+CLXX=$(CXX)
+CC_DEBUG_FLAG=-g -DDEBUG=1 -DDEBUG_VERBOSE=1
+#CC_DEBUG_FLAG=-g -DDEBUG=1
+LD_PATH=-L.
+CP=cp -r
+CAT=cat
+RM=rm -rf
+MV=mv
+AR=ar
+#AR_CMD=$(CROSS_PREFIX)$(AR) rcv -S $@
+AR_CMD=$(CROSS_PREFIX)$(AR) rcv $@
+RANLIB=ranlib
+#RANLIB_FLAGS=-s -no_warning_for_no_symbols
+RANLIB_FLAGS=-s
+RANLIB_CMD=$(CROSS_PREFIX)$(RANLIB) $(RANLIB_FLAGS)
+LIBTOOL=libtool
+
+
+# Mono and MS stuff
+CSC=mcs
+CSFLAGS=/r:System.Drawing /r:System.Windows.Forms /r:System.Data /r:System.DirectoryServices -pkg:gtk-sharp
+VBC=mbas
+VBFLAGS=$(CSFLAGS)
+VJC=echo
+JSFLAGS=$(CSFLAGS)
+ILASM=ilasm
+ILDASM=monodis
+RC=echo NOT BUILDING FOR WINDOWS SO SKIPPING: rc
+RFLAGS=$(DEFS) $(CROSS_FLAGS) -I/usr/include
+
+
+# Java
+JAVA=java
+JAVAC=javac
+JAVAH=javah
+JAVAFLAGS=-Djava.library.path=.
+JCFLAGS=-deprecation
+JHFLAGS=
+ifeq ($(JNI),yes)
+ifneq ($(JDK_PATH),)
+	ifeq ($(WIN_HOST),yes)
+		JNI_HEADERS=-I$(JDK_PATH)/include -I$(JDK_PATH)/include/win32
+	else
+		JNI_HEADERS=-I$(JDK_PATH)/include
+	endif
+	JNICFLAGS=$(JNI_HEADERS)
+endif
+else
+	JNI_HEADERS=
+	JNICFLAGS=
+endif
+
+
+ifeq ($(CROSS),clang)
+	AR_CMD=$(AR) rcv $@
+	RANLIB_CMD=$(RANLIB) $(RANLIB_FLAGS) $@
+endif
+ifeq ($(CROSS),wine)
+	AR_CMD=$(AR) rcv $@
+	RANLIB_CMD=$(RANLIB) $(RANLIB_FLAGS) $@
+endif
+
+
+# Visual Studio
+ifeq ($(CC),cl)
+	MSVC=yes
+endif
+ifeq ($(MSVC),yes)
+#	CC_DEBUG_FLAG=-Zi -DDEBUG=1 -DDEBUG_VERBOSE=1 -GX
+	CC_DEBUG_FLAG=-Zi -DDEBUG=1 -DDEBUG_VERBOSE=1
+	AR=lib /OUT:$@
+	RANLIB_CMD=
+	LD_PATH=gdi32.lib user32.lib kernel32.lib comdlg32.lib wsock32.lib winmm.lib
+#	LD_PATH=gdi32.lib user32.lib kernel32.lib comdlg32.lib wsock32.lib winmm.lib ddraw.lib
+	CSC=csc
+	CSFLAGS=/r:System.Drawing.dll /r:System.Windows.Forms.dll
+	VBC=vbc
+	VBFLAGS=$(CSFLAGS)
+	VJC=vjc
+	JSFLAGS=$(CSFLAGS)
+	ILASM=ilasm
+	ILDASM=ildasm
+	RC=rc
+endif
+
+
+CC_PATH=-I.
+
+DEPENDFLAGS=>Makefile.dep -f- -- $(CFLAGS) --
+LDFLAGS=$(CROSS_FLAGS) $(TINY_FLAGS) $(LD_PATH) $(DEBUG) $(VERBOSE) $(EXTRA_LDFLAGS)
+
+
+####################################################################
+# If cross-compiling...
+####################################################################
+
+ifneq ($(CROSS),)
+ifeq ($(CROSS),-arch ppc)
+	CROSS_FLAGS:=$(CROSS)
+	CROSS=
+endif
+ifeq ($(CROSS),-arch ppc64)
+	CROSS_FLAGS:=$(CROSS)
+	CROSS=
+endif
+ifeq ($(CROSS),-arch i386)
+	CROSS_FLAGS:=$(CROSS)
+	CROSS=
+endif
+ifeq ($(CROSS),-arch x86_64)
+	CROSS_FLAGS:=$(CROSS)
+	CROSS=
+endif
+ifeq ($(CROSS),clang)
+	CC=clang
+	CXX=clang++
+	CL=$(CC)
+	CLXX=$(CXX)
+	CROSS=
+endif
+ifeq ($(CROSS),wine)
+	CC=winegcc
+	CXX=wineg++
+	CL=$(CC)
+	CLXX=$(CXX)
+	CROSS=
+	#CROSS_FLAGS:=-I/usr/local/include/wine/windows
+	#LDFLAGS:=-L/usr/local/lib/wine ../rsrc/winres/alibw32.res
+	LDFLAGS:=../rsrc/winres/alibw32.res
+	#RC=wrc -m16
+	#RC=wrc -m32
+	#RC=wrc -m64
+	RC=wrc
+endif
+endif
+
+ifneq ($(CROSS),)
+	BASE=$(CROSS)$(CROSS_POSTFIX)
+ifeq ($(TINY),yes)
+	CROSS_FLAGS=
+	X11_DIR=.
+else
+	#CROSS_FLAGS=-L/usr/local/$(BASE)/lib -I/usr/local/$(BASE)/include/g++
+	#X11_DIR=/usr/local/$(BASE)/include/X11
+endif
+	CROSS_PREFIX=$(BASE)-
+	#CROSS_STATIC=-Xlinker -Bstatic
+#	RANLIB_FLAGS = -no_warning_for_no_symbols
+ifeq ($(MSVC),yes)
+	BASE=
+	CROSS_FLAGS= -DTINY_MSVC=1
+	CROSS_PREFIX=
+	LD_PATH=
+else
+	CC:=$(CROSS_PREFIX)$(CC)
+	CL:=$(CROSS_PREFIX)$(CL)
+	CXX:=$(CROSS_PREFIX)$(CXX)
+	CLXX:=$(CROSS_PREFIX)$(CLXX)
+endif
+endif
+
+
+####################################################################
+# Platform (our target)
+####################################################################
+
+TARGET_PLATFORM_C=-D$(TARGET_PLATFORM)
+ifeq ($(TARGET_PLATFORM),ASYS_AMIGA)
+	TARGET_PLATFORM_C=-DASYS_AMIGA=1
+#	TARGET_PLATFORM_L=-lamiga
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_WIN16)
+	TARGET_PLATFORM_C=-DASYS_WINDOWS=1 -DASYS_WINDOWS16=1
+	TARGET_PLATFORM_L=-lwsock -lwinmm -luser -lgdi -lcomdlg
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_WIN386)
+	TARGET_PLATFORM_C=-DASYS_WINDOWS=1 -DASYS_WINDOWS386=1
+        TARGET_PLATFORM_L=-lwsock -lwinmm -luser -lgdi -lcomdlg
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_WIN32CE)
+	TARGET_PLATFORM_C=-DASYS_WINDOWS=1 -DASYS_WIN32CE=1
+	TARGET_PLATFORM_L=-lwsock32 -lwinmm -luser32 -lgdi32 -lcomdlg32
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_WIN32)
+	TARGET_PLATFORM_C=-DASYS_WINDOWS=1 -DASYS_WIN32=1
+#	TARGET_PLATFORM_L=-lwsock32 -lwinmm -luser32 -lgdi32 -lcomdlg32
+	TARGET_PLATFORM_L=-lwsock32 -lwinmm -luser32 -lgdi32 -lcomdlg32 -lddraw
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_WINDOWS)
+	TARGET_PLATFORM_C=-DASYS_WINDOWS=1
+#	TARGET_PLATFORM_L=-lwsock32 -lwinmm -luser32 -lgdi32 -lcomdlg32
+	TARGET_PLATFORM_L=-lwsock32 -lwinmm -luser32 -lgdi32 -lcomdlg32 -lddraw
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_DOS16)
+	TARGET_PLATFORM_C=-DASYS_DOS=1 -DASYS_DOS16=1
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_DOS32)
+	TARGET_PLATFORM_C=-=DASYS_DOS=1 DASYS_DOS32=1
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_DOS)
+	TARGET_PLATFORM_C=-DASYS_DOS=1
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_OS2_16)
+	TARGET_PLATFORM_C=-=DASYS_OS2=1 DASYS_OS2_16=1
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_OS2_32)
+	TARGET_PLATFORM_C=-=DASYS_OS2=1 DASYS_OS2_32=1
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_OS2)
+	TARGET_PLATFORM_C=-DASYS_OS2=1
+endif
+#
+# TODO: Only include -m32 if on a 64 bit os!
+ifeq ($(TARGET_PLATFORM),ASYS_MAC)
+#	FRAMEWORKS=-framework Carbon -framework QuickTime
+	TARGET_PLATFORM_C=-DASYS_MAC=1
+	TARGET_PLATFORM_L=$(FRAMEWORKS)
+#	RANLIB_FLAGS=-s -no_warning_for_no_symbols
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_CARBON)
+	FRAMEWORKS=-framework Carbon -framework QuickTime
+	TARGET_PLATFORM_C=-DALIB_NO_PCH=1 -DASYS_MAC=1 -DASYS_CARBON=1 -DTARGET_CARBON=1 -DTARGET_API_CARBON=1
+	TARGET_PLATFORM_L=$(FRAMEWORKS)
+#	RANLIB_FLAGS=-s -no_warning_for_no_symbols
+endif
+#
+ifeq ($(TARGET_PLATFORM),ASYS_SDL)
+	TARGET_PLATFORM_C=-DASYS_SDL=1 `sdl-config --cflags`
+	#TARGET_PLATFORM_L=`sdl-config --libs` -framework OpenGL
+	TARGET_PLATFORM_L=`sdl-config --libs`
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_GLUT)
+	TARGET_PLATFORM_C=-DASYS_GLUT=1 -DNICK_USE_OPENGL=1
+	TARGET_PLATFORM_L= -lX11 -lGL -lGLU -lglut
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_X11)
+ifneq ($(OPENGL_GLX),)
+	TARGET_PLATFORM_C=-I$(X11_DIR)/include -DASYS_X11=1 -DNICK_USE_OPENGL=1
+	TARGET_PLATFORM_L=-L$(X11_DIR)/lib -lX11 -lGL -lGLU
+else
+	TARGET_PLATFORM_C=-I$(X11_DIR)/include -DASYS_X11=1
+	TARGET_PLATFORM_L=-L$(X11_DIR)/lib -lX11
+endif
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_PALM)
+	TARGET_PLATFORM_C=-DASYS_PALM=1
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_POSIX)
+ifneq ($(CURSES_PATH),)
+	TARGET_PLATFORM_C=-DASYS_POSIX=1 -DNICK_USE_CURSES=1
+	TARGET_PLATFORM_L=-lcurses
+endif
+endif
+
+
+####################################################################
+# Target specific
+####################################################################
+
+# NOTE: These only work if TARGET_SYSTEM is set correctly!
+
+ifeq ($(TARGET_SYSTEM),solaris)
+	EXTRA_C=-DASYS_SOLARIS -D__EXTENSIONS__
+	EXTRA_L=-lsocket -lnsl
+endif
+#
+ifeq ($(TARGET_SYSTEM),nextstep)
+	EXTRA_C=-DASYS_NEXT -no-precomp
+endif
+#
+ifeq ($(TARGET_SYSTEM),rhapsody)
+ifeq ($(TARGET_PLATFORM),ASYS_CARBON)
+	EXTRA_C=-DASYS_NEXT -no-precomp -DALIB_NO_PCH -D__POWERPC__ -D_LATITUDE_ -I/usr/latitude/include/latitude -I/usr/latitude/include/CIncludes -fhandle-exceptions
+	EXTRA_L=-framework System
+	FRAMEWORKS=-L/usr/latitude/lib -llg -framework AppKit
+else
+	EXTRA_C=-DASYS_NEXT
+	EXTRA_L=-framework System
+endif
+endif
+#
+ifeq ($(TARGET_SYSTEM),openstep)
+	EXTRA_C=-DASYS_NEXT -D_POSIX_SOURCE
+	EXTRA_L=-lposix
+endif
+#
+ifeq ($(TARGET_SYSTEM),darwin)
+	LIBTOOL=glibtool
+ifeq ($(JNI),yes)
+	JNICFLAGS=$(JNI_HEADERS) -dynamic
+	JNI_HEADERS=-I$(JDK_PATH)/Headers
+else
+	JNICFLAGS=
+	JNI_HEADERS=
+endif
+	EXTRA_C=-DASYS_DARWIN=1
+endif
+#
+ifeq ($(TARGET_SYSTEM),cygwin)
+	EXTRA_C=-DASYS_CYGWIN=1
+endif
+#
+ifeq ($(TARGET_SYSTEM),djgpp)
+	EXTRA_C=-DASYS_DJGPP=1
+endif
+#ifeq ($(CCS_TOOLPATH),/usr/ccs)
+ifeq ($(HOST_UNAMES),SunOS)
+	EXTRA_C=-DASYS_SOLARIS=1
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_AMIGA)
+	EXTRA_C=-DASYS_AROS=1
+endif
+ifeq ($(TARGET_PLATFORM),ASYS_BE)
+	EXTRA_C=-DASYS_HAIKU=1
+endif
+
+
+####################################################################
+# If building with "tiny"
+####################################################################
+
+ifeq ($(TINY),yes)
+	TARGET_PLATFORM_C=-I./include
+ifeq ($(MSVC),yes)
+	TINY_FLAGS=/X
+else
+	TINY_FLAGS=-nostdinc -nostdlib -nostartfiles
+	TARGET_PLATFORM_C=-I./include
+	TARGET_PLATFORM_L=-L. -ltiny
+endif
+endif
+
+
+####################################################################
+# Compiler
+####################################################################
+
+OFILE=o
+AFILE=a
+SFILE=s
+SOFILE=so
+BINFILE=
+
+
+ifneq ($(NODEBUG),yes)
+	DEBUG=$(CC_DEBUG_FLAG)
+endif
+
+ifeq ($(MSVC),yes)
+	OFILE=obj
+	SFILE=asm
+	AFILE=lib
+	SOFILE=dll
+	BINFILE=exe
+endif
+
+
+####################################################################
+# Options that work on more than one platform...
+####################################################################
+
+ifeq ($(PNM),yes)
+	PNM_C=-DUSE_PNM_CMDS
+endif
+ifeq ($(JOYSTICK),yes)
+	JOYSTICK_C=-DUSE_JOYSTICK
+endif
+ifeq ($(MYSQL),yes)
+#	MYSQL_C=-DUSE_MYSQL -I/usr/local/include/mysql
+	MYSQL_C=-DUSE_MYSQL
+#	MYSQL_L=-L/usr/local/lib/mysql -lmysqlclient
+	MYSQL_L=-lmysqlclient
+endif
+ifeq ($(BUILD_FAT),yes)
+	FAT_C=-arch ppc -arch i386
+	FAT_L=-arch ppc -arch i386
+endif
+OPTIONS_C=$(PNM_C) $(JOYSTICK_C) $(MYSQL_C) $(FAT_C) $(EXTRA_C)
+OPTIONS_L=$(MYSQL_L) $(FAT_L) $(EXTRA_L)
+
+
+####################################################################
+# The setup of all the flags and everything
+####################################################################
+
+DEFS=$(TARGET_PLATFORM_C) $(OPTIONS_C)
+CFLAGS=$(CROSS_FLAGS) $(TINY_FLAGS) $(JNICFLAGS) $(DEFS) $(CC_PATH) $(EXTRA_INCS) $(DEBUG) $(OPTIMIZE) $(VERBOSE) $(EXTRA_FLAGS)
+CXXFLAGS=$(CFLAGS)
+LDLIBS=$(TARGET_PLATFORM_L) $(OPTIONS_L) $(EXTRA_LIBS) $(LFRAMEWORKS) $(USE_LIBS)
+LIBS=$(TARGET_PLATFORM_L) $(OPTIONS_L) $(EXTRA_LIBS) $(LFRAMEWORKS)
+LIBS_CXX=$(LIBS) -lstdc++ -lg++
+
+
+####################################################################
+# How we compile...
+####################################################################
+
+.SUFFIXES: .c .cpp .m .java .class .h .l .y .s .cs .vb .jsl .il .javap .p .pas .dpr
+.SUFFIXES: .so .dll .dylib .jnilib .app
+.SUFFIXES: .o .obj .exe .rc .res .def .bin .dis .r .rsrc
+
+
+.c.$(OFILE): $(OTHER_H)
+ifeq ($(TINY),yes)
+ifeq ($(MSVC),yes)
+	$(CC) $(CFLAGS) -c /FA $*.c
+else
+	$(CC) $(CFLAGS) -S $*.c
+endif
+endif
+	$(CC) $(CFLAGS) -c $*.c
+
+.c.$(SFILE): $(OTHER_H)
+	$(CC) $(CFLAGS) -S $*.c
+
+.cpp.$(OFILE): $(OTHER_H)
+ifeq ($(TINY),yes)
+ifeq ($(MSVC),yes)
+	$(CXX) $(CXXFLAGS) -c /FA $*.cpp
+else
+	$(CXX) $(CXXFLAGS) -S $*.cpp
+endif
+endif
+	$(CXX) $(CXXFLAGS) -c $*.cpp
+
+.cpp.$(SFILE): $(OTHER_H)
+	$(CXX) $(CXXFLAGS) -S $*.cpp
+
+#.m.$(OFILE): $(OTHER_H)
+#	$(CC) $(CFLAGS) -c $*.m
+
+#.m.$(SFILE): $(OTHER_H)
+#	$(CC) $(CFLAGS) -S $*.m
+
+.p:
+	$(PC) $*.p
+
+.pas:
+	$(PC) $*.pas
+
+.dpr:
+	$(PC) $*.dpr
+
+.cs.exe:
+	$(CSC) $(CSFLAGS) $*.cs
+	$(ILDASM) --output=$*.il $*.exe
+
+.vb.exe:
+	$(VBC) $(VBFLAGS) $*.vb
+	$(ILDASM) --output=$*.il $*.exe
+
+.jsl.exe:
+	$(VJC) $(JSFLAGS) $*.jsl
+	$(ILDASM) /out=$*.il $*.exe
+
+.il.exe:
+	$(ILASM) $*.il
+
+.java.class:
+	$(JAVAC) $(JCFLAGS) $*.java
+ifeq ($(JNI),yes)
+	$(JAVAH) $(JHFLAGS) $*
+endif
+#	javap -c -s -l -private -verbose $* >$*.javap
+
+.class.javap:
+#	javap -c -s -l -private -verbose $* >$*.javap
+
+.rc.res:
+	$(RC) $(RFLAGS) $*.rc
+
+#.$(OFILE).bin: $(OTHER_O)
+#ifeq ($(MSVC),yes)
+#	$(CL) $(LDFLAGS) /Fo$*.bin $*.$(OFILE) $(LIBS) /link /SUBSYSTEM:WINDOWSCE
+#else
+#	$(CL) $(LDFLAGS) -o $*.bin $*.$(OFILE) $(LIBS)
+#endif
+
+
+.bin.dis:
+	$(CROSS_PREFIX)objdump --disassemble $*.bin >$*.dis
+
+
+# NOTE: This doesn't seem to be working anymore!
+.o.app:
+ifeq ($(BUILD_BUNDLE),yes)
+	mkdir $*.app
+	mkdir $*.app/Contents
+	mkdir $*.app/Contents/MacOS
+	mkdir $*.app/Contents/Resources
+	/bin/echo -n "APPL????" >$*.app/Contents/PkgInfo
+	cp -f $* $*.app/Contents/MacOS
+	cp -f ../rsrc/macres/test.Info.plist $*.app/Contents/Info.plist
+	sed -i.orig s/test/$*/g $*.app/Contents/Info.plist
+endif
+

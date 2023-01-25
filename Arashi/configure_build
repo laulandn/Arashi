@@ -1,0 +1,927 @@
+#! /bin/bash
+
+# to use at some point:
+# MACHTYPE=i686-pc-cygwin
+# HOSTTYPE=i686
+# OS=Windows_MT (only windows)
+# OSTYPE=cygwin
+# PROCESSOR_ARCHITECTURE=x86 (only windows)
+# WINDIR='C:\WINDOWS' (only windows)
+#Configured with: --prefix=/Applications/Xcode.app/Contents/Developer/usr --with-gxx-include-dir=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/4.2.1
+#InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+
+echo "# created by configure_build" >config.build
+
+
+########################################
+
+# We'll prefer /usr/local/bin/test if it's there
+# (Because that should be the GNU version on non-GNU systems)
+# TODO: Try not to be aso picky
+TEST=test
+if [ -f /bin/test ] ; then
+	TEST=/bin/test
+fi
+if [ -f /usr/bin/test ] ; then
+	TEST=/usr/bin/test
+fi
+if [ -f /usr/local/bin/test ] ; then
+	TEST=/usr/local/bin/test
+fi
+echo "TEST=$TEST"
+echo "TEST=$TEST" >>config.build
+
+
+########################################
+
+if $TEST -d /usr ; then
+  USR=/usr
+fi
+
+########################################
+
+
+#example:
+#TINY="yes"
+#TEENY="yes"
+#CROSS=$CC
+#CROSS=winegcc
+#CROSS=x86_64-unknown-linux
+#CROSS="cc65-2.3.1/cc65/cc65"
+#CROSSAS="cc65-2.3.1/binutils/ca65/ca65
+
+if $TEST -z "$TINY" ; then
+  TINY="no"
+fi
+if $TEST -z "$TEENY" ; then
+  TEENY="no"
+fi
+
+echo "CROSS=$CROSS" >>config.build
+echo "CROSSAS=$CROSSAS" >>config.build
+echo "TINY=$TINY" >>config.build
+echo "TEENY=$TEENY" >>config.build
+
+#echo "JNI=$JNI" >>config.build
+#echo "SHAREDLIBS=$SHAREDLIBS" >>config.build
+
+
+########################################
+
+# TODO: Use PREFIX, so move this?
+CROSS_PREFIX=
+
+# For bin/ls etc
+CMDLINETOOLS=/
+
+# /usr on a typical linux system
+PREFIX=$CMDLINETOOLS""usr$CROSS_PREFIX
+
+# For stdio.h etc
+if $TEST -d $PREFIX/include ; then
+  STDHEADERS=$PREFIX/include
+fi
+if $TEST -d /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include ; then
+  STDHEADERS=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+fi
+if $TEST -d /boot/develop/headers/posix ; then
+  STDHEADERS=/boot/develop/headers/posix
+fi
+
+# For bin/gcc etc
+# prob i586-pc-linux/bin/as etc
+# or might be /usr/gnu/bin etc
+CMDLINEDEV=$PREFIX
+#if $TEST -d /Applications/Xcode.app/Contents/Developer ; then
+#  CMDLINEDEV=/Applications/Xcode.app/Contents/Developer
+#fi
+if $TEST -d /Library/Developer/CommandLineTools ; then
+  CMDLINEDEV=/Library/Developer/CommandLineTools
+fi
+if $TEST -d /boot/develop/tools/gnupro ; then
+  CMDLINEDEV=/boot/develop/tools/gnupro
+fi
+
+if $TEST -n "$CROSS" ; then
+  echo "Configuring for cross target $CROSS"
+  CROSS_PREFIX=${CROSS}-
+  # Don't hard code this!
+  PREFIX=$CMDLINETOOLS""usr/local/$CROSS
+  if $TEST $CROSS = "wine" ; then
+    CROSS_PREFIX=${CROSS}
+    TARGET_PLATFORM=ASYS_WIN32
+  fi
+  if $TEST $CROSS = "clang" ; then
+    # NOTE: The missing g will be filled in by g++, etc
+    CROSS_PREFIX="clan"
+  fi
+  echo "Setting CROSS_PREFIX to $CROSS_PREFIX"
+  echo "Setting PREFIX to $PREFIX"
+fi
+echo "CROSS_PREFIX=$CROSS_PREFIX" >>config.build
+echo "CMDLINETOOLS=$CMDLINETOOLS" >>config.build
+echo "PREFIX=$PREFIX" >>config.build
+echo "CMDLINEDEV=$CMDLINEDEV" >>config.build
+echo "STDHEADERS=$STDHEADERS" >>config.build
+
+
+########################################
+
+echo "Going to call config.guess..."
+CONFIG_GUESS=`./config.guess`
+echo "CONFIG_GUESS=$CONFIG_GUESS" >>config.build
+
+echo "Determining host system release and cpu..."
+CONFIG_GUESS_ALL=`echo $CONFIG_GUESS | tr -d .0-9`
+#
+HOST_SYSTEM=`echo $CONFIG_GUESS_ALL | sed -e 's/.*-.*-\(.*\)/\1/g'`
+HOST_RELEASE=`(uname -r) 2>/dev/null` || HOST_RELEASE=unknown
+HOST_UNAMES=`(uname -s) 2>/dev/null` || HOST_UNAMES=unknown
+if $TEST -z "$HOST_SYSTEM" ; then
+  HOST_SYSTEM=$HOST_UNAMES
+fi
+#
+HOST_UNAMEM=`(uname -m) 2>/dev/null` || HOST_UNAMEM=unknown
+#HOST_CPU=`(arch) 2>/dev/null` || HOST_CPU=unknown
+#if $TEST $HOST_CPU = "unknown" ; then
+#  HOST_CPU=`(uname -p) 2>/dev/null` || HOST_CPU=unknown
+#fi
+#if $TEST $HOST_CPU = "unknown" ; then
+#  HOST_CPU=`echo $CONFIG_GUESS | sed -e 's/\(.*\)-.*-.*/\1/g'`
+#fi
+if $TEST -z "$HOST_CPU" ; then
+  HOST_CPU=$HOST_UNAMEM
+fi
+if $TEST "$HOST_CPU" = "Power Macintosh" ; then
+  HOST_CPU="powerpc"
+fi
+#
+HOST_PLATFORM="ASYS_POSIX"
+#
+echo "$HOST_SYSTEM $HOST_RELEASE on $HOST_CPU"
+
+
+########################################
+
+#TODO: DONT_USE_DEV_NULL isn't used consistently/correctly?
+echo -n "Checking for Unix, Windows, or Mac host..."
+DONT_USE_DEV_NULL=0
+UNIX_HOST=no
+WIN_HOST=no
+MAC_HOST=no
+if $TEST "$HOST_SYSTEM" = "darwin" ; then
+  UNIX_HOST=yes
+  MAC_HOST=yes
+  DONT_USE_DEV_NULL=1
+  # TODO Don't always assume this!
+  HOST_PLATFORM="ASYS_CARBON"
+fi
+if $TEST "$HOST_SYSTEM" = "openstep" ; then
+  UNIX_HOST=yes
+  DONT_USE_DEV_NULL=1
+  HOST_PLATFORM="ASYS_COCOA"
+fi
+if $TEST "$HOST_SYSTEM" = "rhapsody" ; then
+  UNIX_HOST=yes
+  #MAC_HOST=yes
+  DONT_USE_DEV_NULL=1
+  HOST_PLATFORM="ASYS_COCOA"
+fi
+#
+if $TEST "$HOST_SYSTEM" = "cygwin" ; then
+  DONT_USE_DEV_NULL=1
+  UNIX_HOST=
+  WIN_HOST=yes
+  HOST_PLATFORM="ASYS_WIN32"
+  # TODO: set a variable for this here?
+fi
+if $TEST "$HOST_SYSTEM" = "mingw" ; then
+  DONT_USE_DEV_NULL=1
+  UNIX_HOST=
+  WIN_HOST=yes
+  HOST_PLATFORM="ASYS_WIN32"
+  # TODO: set a variable for this here?
+fi
+# Does this one actually ever happen?
+if $TEST "$HOST_SYSTEM" = "microsoft" ; then
+  DONT_USE_DEV_NULL=1
+  UNIX_HOST=
+  WIN_HOST=yes
+  HOST_PLATFORM="ASYS_WIN32"
+fi
+#
+# This is just Linux, right? (per RMS)
+if $TEST "$HOST_SYSTEM" = "gnu" ; then
+  UNIX_HOST=yes
+  DONT_USE_DEV_NULL=1
+  HOST_PLATFORM="ASYS_POSIX"
+fi
+if $TEST "$HOST_SYSTEM" = "freebsd" ; then
+  UNIX_HOST=yes
+  DONT_USE_DEV_NULL=1
+fi
+if $TEST "$HOST_SYSTEM" = "netbsd" ; then
+  UNIX_HOST=yes
+  DONT_USE_DEV_NULL=1
+fi
+if $TEST "$HOST_SYSTEM" = "openbsd" ; then
+  UNIX_HOST=yes
+  DONT_USE_DEV_NULL=1
+fi
+#
+if $TEST "$HOST_SYSTEM" = "Minix" ; then
+  UNIX_HOST=yes
+  DONT_USE_DEV_NULL=1
+fi
+#
+if $TEST "$HOST_SYSTEM" = "machten" ; then
+  UNIX_HOST=yes
+  MAC_HOST=yes
+  DONT_USE_DEV_NULL=1
+fi
+#
+# Ones that config.guess might not get...
+#
+if $TEST "$HOST_UNAMES" = "Linux" ; then
+  UNIX_HOST=yes
+  DONT_USE_DEV_NULL=1
+  HOST_PLATFORM="ASYS_POSIX"
+fi
+#
+if $TEST "$HOST_UNAMES" = "SunOS" ; then
+  UNIX_HOST=yes
+  HOST_SYSTEM=sunos
+  DONT_USE_DEV_NULL=1
+fi
+#
+if $TEST "$HOST_UNAMES" = "AROS" ; then
+  HOST_SYSTEM=aros
+  DONT_USE_DEV_NULL=1
+  HOST_PLATFORM="ASYS_AMIGA"
+fi
+#
+if $TEST "$HOST_UNAMES" = "Haiku" ; then
+  HOST_SYSTEM=haiku
+  DONT_USE_DEV_NULL=1
+  HOST_PLATFORM="ASYS_BE"
+fi
+#
+if $TEST "$HOST_UNAMES" = "Mac OS" ; then
+  UNIX_HOST=yes
+  MAC_HOST=yes
+  HOST_SYSTEM=darwin
+  DONT_USE_DEV_NULL=1
+  HOST_PLATFORM="ASYS_CARBOM"
+fi
+#
+echo "UNIX_HOST=$UNIX_HOST" >>config.build
+echo "WIN_HOST=$WIN_HOST" >>config.build
+echo "MAC_HOST=$MAC_HOST" >>config.build
+echo "$UNIX_HOST, $WIN_HOST and $MAC_HOST"
+
+
+########################################
+
+echo "Checking for compilers..."
+if $TEST "$CC" ; then
+  echo "CC already defined"
+else
+#
+# TODO: Check cc.out between each test for compiler info...
+CCUCVER=`(${CROSS_PREFIX}CC -v 2>cc.out) && echo yes`
+echo "CCUCVER...${CROSS_PREFIX}$CCUCVER"
+CLVER=`(${CROSS_PREFIX}cl 2>/dev/null) && echo yes`
+echo "CLVER...${CROSS_PREFIX}$CLVER"
+GPPVER=`(${CROSS_PREFIX}g++ -v 2>cc.out) && echo yes`
+echo "GPPVER...${CROSS_PREFIX}$GPPVER"
+CPPVER=`(${CROSS_PREFIX}c++ -v 2>cc.out) && echo yes`
+echo "CPPVER...${CROSS_PREFIX}$CPPVER"
+GCCVER=`(${CROSS_PREFIX}gcc -v 2>cc.out) && echo yes`
+echo "GCCVER...$GCCVER"
+CCVER=`(${CROSS_PREFIX}cc -v 2>cc.out) && echo yes`
+echo "CCVER...${CROSS_PREFIX}$CCVER"
+CLANGVER=`(${CROSS_PREFIX}clang -v 2>cc.out) && echo yes`
+echo "CLANGVER...$CLANGVER"
+rm -f cc.out
+#
+# TODO: Check cc.out between each test for compiler info...
+#PCVER=`(${CROSS_PREFIX}pc -v 2>cc.out) && echo yes`
+#echo "PCVER...${CROSS_PREFIX}$PCVER"
+# TODOL Make sure this works and add "pp" also?
+FPCVER=`(${CROSS_PREFIX}fpc -iV 2>cc.out)`
+echo "FPCVER...${CROSS_PREFIX}$FPCVER"
+rm -f cc.out
+#
+# TODO: Check for other jikes, etc?
+# NOTE: This doesn't work
+JAVACVER=`(${CROSS_PREFIX}javac -version 2>cc.out)`
+echo "JAVACVER...${CROSS_PREFIX}$JAVACVER"
+rm -f cc.out
+#
+CC="none"
+CXX="none"
+#PASC="none"
+JAVAC="none"
+if $TEST "$CCVER" ; then
+  CC="${CROSS_PREFIX}cc"
+fi
+if $TEST "$CCUCVER" ; then
+  CXX="${CROSS_PREFIX}CC"
+fi
+if $TEST "$GCCVER" ; then
+  CC="${CROSS_PREFIX}gcc"
+fi
+if $TEST "$CLVER" ; then
+  CC="${CROSS_PREFIX}cl"
+  # usually...
+  CXX="${CROSS_PREFIX}cl"
+fi
+if $TEST "$CPPVER" ; then
+  CXX="${CROSS_PREFIX}c++"
+fi
+if $TEST "$GPPVER" ; then
+  CXX="${CROSS_PREFIX}g++"
+fi
+if $TEST "$PCVER" ; then
+  PASC="${CROSS_PREFIX}pc"
+fi
+if $TEST "$FPCVER" ; then
+  PASC="${CROSS_PREFIX}fpc"
+fi
+if $TEST "$JAVACVER" ; then
+  JAVAC="${CROSS_PREFIX}javac"
+fi
+# NOTE: This one is different
+if $TEST -e ${PREFIX}/bin/javac ; then
+  JAVAC="${PREFIX}/bin/javac"
+fi
+fi
+# in case we just have one c++ compiler
+if $TEST "$CC" = "none" ; then
+  CC=$CXX
+fi
+if $TEST "$CC" = "none" ; then
+  echo "*********************************"
+  echo "WARMING: NO C COMPILER FOUND!"
+  echo "*********************************"
+fi
+#
+echo "CC is $CC"
+echo "CC=$CC" >>config.build
+echo "CXX is $CXX"
+echo "CXX=$CXX" >>config.build
+echo "PASC is $PASC"
+echo "PASC=$PASC" >>config.build
+echo "JAVAC is $JAVAC"
+echo "JAVAC=$JAVAC" >>config.build
+
+
+if $TEST "$WIN_HOST" = "yes" ; then
+echo -n "MSVC="
+# Add something here to detect this...?
+# (but see top where this can be set to force to use it)
+#MSVC=
+echo "$MSVC"
+echo "MSVC=$MSVC" >>config.build
+fi
+
+
+if $TEST "$MAC_HOST" = "yes" ; then
+XCODE=
+echo -n "XCODE="
+if $TEST -e /Developer ; then
+XCODE=/Developer
+fi
+if $TEST -e /Applications/XCode.app ; then
+XCODE=/Applications/XCode.cpp
+fi
+if $TEST -e /Applications/XCode.app ; then
+XCODE=/Applications/XCode.cpp
+fi
+echo "$XCODE"
+echo "XCODE=$XCODE" >>config.build
+#
+XCODE_PREFIX=
+echo -n "XCODE_PREFIX="
+if $TEST -e /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain ; then
+XCODE_PREFIX=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain
+# TODO: Should prob set CMDLINEDEV to this too
+fi
+echo "$XCODE_PREFIX"
+echo "XCODE_PREFIX=$XCODE_PREFIX" >>config.build
+#
+echo -n "PBUILDER="
+# Add something here to detect this...
+PBUILDER=
+echo "$PBUILDER"
+echo "PBUILDER=$PBUILDER" >>config.build
+fi
+
+
+########################################
+
+# TODO: Check that if we find make, it is gnu
+echo -n "Checking which make you have..."
+MAKE="none"
+# NOTE Our rough order of preference
+DMAKEVER=`(dmake -v >/dev/null 2>/dev/null) && echo yes`
+# Need to try and detect BSD make...if so, warn not to use it
+MAKEVER=`(make -v >/dev/null 2>/dev/null) && echo yes`
+CMAKEVER=`(cmake -v >/dev/null 2>/dev/null) && echo yes`
+GMAKEVER=`(gmake -v >/dev/null 2>/dev/null) && echo yes`
+GNUMAKEVER=`(gnumake -v >/dev/null 2>/dev/null) && echo yes`
+#
+if $TEST "$DMAKEVER" ; then
+  MAKE="dmake"
+fi
+if $TEST "$MAKEVER" ; then
+  MAKE="make"
+fi
+#if $TEST "$CMAKEVER" ; then
+#  MAKE="cmake"
+#fi
+#if $TEST "$GMAKEVER" ; then
+#  MAKE="gmake"
+#fi
+#if $TEST "$GNUMAKEVER" ; then
+#  MAKE="gnumake"
+#fi
+if $TEST "$MAKE" = "none" ; then
+  echo " "
+  echo "No Make utility found, giving up."
+  exit 5
+fi
+#
+echo "MAKE=$MAKE" >>config.build
+echo "$MAKE"
+
+
+########################################
+
+#if $TEST "$UNIX_HOST" = "yes" ; then
+#
+# not even sure what this is supposed to be used for
+#MULTI_LIB=
+#
+#echo "MULTI_LIB=$MULTI_LIB" >>config.build
+
+# very silly way to tell if we are on a 64 bit system...
+#if $TEST -n "$CROSS" ; then
+TARGET_64BIT=`uname -m | grep 64`
+#if $TEST "$MAC_HOST" = "yes" ; then
+# TODO: Special mac way?
+#fi
+echo "TARGET_64BIT=$TARGET_64BIT" >>config.build
+#fi
+
+#if $TEST -n "$CROSS" ; then
+#  LIB_DIR=/usr/lib
+#fi
+echo "Checking for /usr/lib directories..."
+# should I be setting LIB_DIR anywhere here?
+if $TEST -d ${CROSS_PREFIX}/lib ; then 
+  echo "found ${CROSS_PREFIX}/lib"
+  LIB_DIR=${CROSS_PREFIX}/lib
+fi
+if $TEST -h ${CROSS_PREFIX}/lib ; then 
+  echo "FYI ${CROSS_PREFIX}/lib is a symlink"
+fi
+if $TEST -d ${CROSS_PREFIX}/lib32 ; then 
+  echo "found ${CROSS_PREFIX}/lib32"
+  LIB_DIR=${CROSS_PREFIX}/lib32
+fi
+if $TEST -h ${CROSS_PREFIX}/lib32 ; then 
+  echo "FYI ${CROSS_PREFIX}/lib32 is a symlink"
+fi
+if $TEST -d ${CROSS_PREFIX}/lib64 ; then 
+  echo "found ${CROSS_PREFIX}/lib64"
+  LIB_DIR=${CROSS_PREFIX}/lib64
+fi
+if $TEST -h ${CROSS_PREFIX}/lib64 ; then 
+  echo "FYI ${CROSS_PREFIX}/lib64 is a symlink"
+fi
+#
+echo "LIB_DIR=$LIB_DIR" >>config.build
+#
+#fi
+
+
+########################################
+
+# TODO: Don't use hard coded paths!!!
+# NOTE: Order is important here, with more preferred going later...
+if $TEST -z "$CROSS" ; then
+echo -n "Checking for X11..."
+X11_DIR=
+if $TEST -f ${PREFIX}/include/X11/X.h ; then 
+  HOST_PLATFORM="ASYS_X11"
+  X11_DIR=/usr
+fi
+if $TEST -f ${PREFIX}/openwin/include/X11/X.h ; then 
+  HOST_PLATFORM="ASYS_X11"
+  X11_DIR=/usr/openwin
+fi
+if $TEST -f ${PREFIX}/X11/include/X11/X.h ; then 
+  HOST_PLATFORM="ASYS_X11"
+  X11_DIR=/usr/X11
+fi
+if $TEST -f ${PREFIX}/X11R6/include/X11/X.h ; then 
+  HOST_PLATFORM="ASYS_X11"
+  X11_DIR=/usr/X11R6
+fi
+if $TEST -f /opt/local/include/X11/X.h ; then 
+  HOST_PLATFORM="ASYS_X11"
+  X11_DIR=/opt/local
+fi
+fi
+#
+echo "X11_DIR=$X11_DIR" >>config.build
+echo "$X11_DIR"
+
+
+echo -n "Checking if you have makedepend..."
+MAKEDEPEND=
+TEST_MAKEDEPEND=`(makedepend -v >/dev/null 2>/dev/null) && echo yes`
+if $TEST "$TEST_MAKEDEPEND" ; then
+  MAKEDEPEND="makedepend"
+fi
+echo "MAKEDEPEND=$MAKEDEPEND" >>config.build
+echo "$MAKEDEPEND"
+
+
+########################################
+
+# TODO: Don't use hard coded paths!!!
+# TODO: Add more paths like /usr/include/X11/GL?
+# TODO: Use prefix or X11 paths
+OPENGL_GLU_H=
+OPENGL_GLX_H=
+if $TEST -z "$CROSS" ; then
+echo -n "Checking for glx.h..."
+if $TEST -e ${PREFIX}/include/GL/glx.h ; then 
+  OPENGL_GLX_H=${PREFIX}/include/GL/glx.h
+fi
+if $TEST -e ${PREFIX}/X11/include/GL/glx.h ; then 
+  OPENGL_GLX_H=${PREFIX}/X11/include/GL/glx.h
+fi
+echo "$OPENGL_GLX_H"
+
+echo -n "Checking for glu.h..."
+if $TEST -e ${PREFIX}/include/GL/glu.h ; then 
+  OPENGL_GLU_H=${PREFIX}/include/GL/glu.h
+fi
+if $TEST -e ${PREFIX}/X11/include/GL/glu.h ; then 
+  OPENGL_GLU_H=${PREFIX}/X11/include/GL/glu.h
+fi
+echo "$OPENGL_GLX_H"
+fi
+#
+echo "OPENGL_GLX_H=$OPENGL_GLX_H" >>config.build
+echo "OPENGL_GLU_H=$OPENGL_GLU_H" >>config.build
+
+
+########################################
+
+
+#### NOTE: These should really go way back before at least /usr/lib detection!
+
+
+if $TEST "$WIN_HOST" = "yes" ; then
+echo "Checking for windows.h?"
+if $TEST -f ${PREFIX}/include/windows.h ; then 
+  HOST_PLATFORM="ASYS_WIN32"
+fi
+if $TEST -f ${PREFIX}/include/w32api/windows.h ; then 
+  HOST_PLATFORM="ASYS_WIN32"
+fi
+fi
+
+if $TEST "$WIN_HOST" = "yes" ; then
+echo "Checking for MSVC?"
+if $TEST "$MSVCDIR" ; then
+  echo "yes"
+  HOST_PLATFORM="ASYS_WIN32"
+  HOST_SYSTEM="microsoft"
+else
+  echo "no"
+fi
+fi
+
+
+########################################
+
+#if $TEST "$UNIX_HOST" = "yes" ; then
+if $TEST -z "$CROSS " ; then
+echo "Checking for GTK+-2.0..."
+GTK2_VERSION=`pkg-config gtk+-2.0 --version`
+if $TEST "GTK2_VERSION" ; then
+  echo $GTK2_VERSION
+fi
+echo "GTK2_VERSION=$GTK2_VERSION" >>config.build
+fi
+#fi
+
+#if $TEST "$UNIX_HOST" = "yes" ; then
+#if $TEST -z "$CROSS" ; then
+#echo "Checking for FLTK..."
+#FLTK_VERSION=`fltk-config --version`
+#if $TEST "$FLTK_VERSION" ; then
+#  HOST_PLATFORM="ASYS_FLTK"
+#  echo $FLTK_VERSION
+#else
+#  echo "no"
+#fi
+#echo "FLTK_VERSION=$FLTK_VERSION" >>config.build
+#fi
+#fi
+
+#if $TEST "$UNIX_HOST" = "yes" ; then
+if $TEST -z "$CROSS" ; then
+echo -n "Checking for SDL..."
+SDL_VERSION=`sdl-config --version 2>/dev/null`
+if $TEST "$SDL_VERSION" ; then
+#  HOST_PLATFORM="ASYS_SDL"
+  echo $SDL_VERSION
+  SDL_LIBS=`sdl-config --libs`
+  SDL_CFLAGS=`sdl-config --cflags`
+else
+  echo "no"
+fi
+echo -n "Checking for SDL2..."
+SDL2_VERSION=`sdl2-config --version 2>/dev/null`
+if $TEST "$SDL2_VERSION" ; then
+#  HOST_PLATFORM="ASYS_SDL"
+  echo $SDL2_VERSION
+  SDL2_LIBS=`sdl2-config --libs`
+  SDL2_CFLAGS=`sdl2-config --cflags`
+else
+  echo "no"
+fi
+echo "SDL_VERSION=$SDL_VERSION" >>config.build
+echo "SDL_LIBS=$SDL_LIBS" >>config.build
+echo "SDL_CFLAGS=$SDL_CFLAGS" >>config.build
+echo "SDL2_VERSION=$SDL2_VERSION" >>config.build
+echo "SDL2_LIBS=$SDL2_LIBS" >>config.build
+echo "SDL2_CFLAGS=$SDL2_CFLAGS" >>config.build
+fi
+#fi
+
+
+########################################
+
+# TODO: Check for NeXT here too?
+# NOTE! Because we don't support Cocoa (yet) we don't use it
+# instead  we fall back to X11 (if present)
+if $TEST "$MAC_HOST" = "yes" ; then
+if $TEST -z "$CROSS" ; then
+echo -n "Checking for Cocoa..."
+COCOA_DIR="no"
+if $TEST -d /System/Library/Frameworks/Cocoa.framework ; then 
+  if $TEST -z "$TARGET_64BIT" ; then
+  HOST_PLATFORM="ASYS_COCOA"
+  fi
+  COCOA_DIR=/System/Library/Frameworks/Cocoa.framework
+fi
+echo "COCOA_DIR=$COCOA_DIR" >>config.build
+echo "$COCOA_DIR"
+fi
+fi
+
+# TODO: test if this is a crippled version of Carbonn
+# for now we just assume if its a 64-bit Mac that it is..
+if $TEST "$MAC_HOST" = "yes" ; then
+if $TEST -z "$CROSS" ; then
+echo -n "Checking for Carbon..."
+CARBON_DIR="no"
+if $TEST -d /System/Library/Frameworks/Carbon.framework ; then 
+  if $TEST -z "$TARGET_64BIT" ; then
+  HOST_PLATFORM="ASYS_CARBON"
+  fi
+  CARBON_DIR=/System/Library/Frameworks/Carbon.framework
+fi
+echo "CARBON_DIR=$CARBON_DIR" >>config.build
+echo "$CARBON_DIR"
+fi
+fi
+
+if $TEST "$MAC_HOST" = "yes" ; then
+BUILD_BUNDLE=
+if $TEST "$HOST_PLATFORM" = "ASYS_COCOA" ; then
+  BUILD_BUNDLE=yes
+fi
+if $TEST "$HOST_PLATFORM" = "ASYS_CARBON" ; then
+  BUILD_BUNDLE=yes
+fi
+echo "BUILD_BUNDLE=$BUILD_BUNDLE" >>config.build
+fi
+
+if $TEST "$MAC_HOST" = "yes" ; then
+echo -n "Checking for Mac devtools..."
+if $TEST -d /Developer/Tools ; then 
+  REZ_TOOLPATH="/Developer/Tools"
+fi
+if $TEST -d /Library/Developer/ComandLineTools/usr/bin/Rez ; then 
+  REZ_TOOLPATH="/Library/Developer/CommandLineTools/usr/bin"
+fi
+if $TEST -f /Applications/XCode.app/Contents/Developer/Tools/Rez ; then 
+  REZ_TOOLPATH="/Applications/Xcode.app/Contents/Developer/Tools"
+fi
+if $TEST -f /Applications/XCode.app/Contents/Developer/usr/bin/Rez ; then 
+  # TODO: Check for other things like g++ in usr/bin
+  REZ_TOOLPATH="/Applications/Xcode.app/Contents/Developer/usr/bin"
+fi
+echo "REZ_TOOLPATH=$REZ_TOOLPATH" >>config.build
+echo "$REZ_TOOLPATH"
+fi
+
+
+########################################
+
+if $TEST "$UNIX_HOST" = "yes" ; then
+echo -n "Checking for Solaris devtools..."
+if $TEST -d /usr/ccs ; then 
+  CCS_TOOLPATH="/usr/ccs"
+  echo "CCS_TOOLPATH=$CCS_TOOLPATH" >>config.build
+fi
+echo "$CCS_TOOLPATH"
+fi
+
+########################################
+
+
+# TODO: Don't use hard coded paths for these!!!
+
+
+echo -n "Checking for (n)curses..."
+if $TEST -e ${PREFIX}/include/curses.h ; then 
+  CURSES_PATH="${PREFIX}/include"
+fi
+if $TEST -e ${PREFIX}/include/ncurses.h ; then 
+  CURSES_PATH="${PREFIX}/include"
+fi
+echo "$CURSES_PATH"
+echo "CURSES_PATH=$CURSES_PATH" >>config.build
+
+echo -n "Checking for pthreads..."
+if $TEST -e ${PREFIX}/include/pthread.h ; then
+  PTHREAD_PATH="${PREFIX}/include"
+fi
+echo "$PTHREAD_PATH"
+echo "PTHREAD_PATH=$PTHREAD_PATH" >>config.build
+
+# TODO: Put this with the previous gtk check!
+echo -n "Checking for gtk..."
+if $TEST -e ${PREFIX}/include/gtk/gtk.h ; then
+  GTK_PATH="${PREFIX}/include/gtk"
+fi
+if $TEST -e ${PREFIX}/include/gtk-2.0/gtk/gtk.h ; then
+  GTK_PATH="${PREFIX}/include/gtk-2.0/gtk"
+fi
+echo "$GTK_PATH"
+echo "GTK_PATH=$GTK_PATH" >>config.build
+
+# TODO: Put this with the previous sdl check!
+#echo "Checking for SDL..."
+#if $TEST -e ${PREFIX}/include/SDL/SDL.h ; then
+#  SDL_PATH="${PREFIX}/include/SDL"
+#echo "$SDL_PATH"
+#fi
+#echo "SDL_PATH=$SDL_PATH" >>config.build
+
+echo -n "Checking for OpenAL..."
+if $TEST -e ${PREFIX}/include/AL/al.h ; then
+  AL_PATH="${PREFIX}/include/AL"
+fi
+echo "$AL_PATH"
+echo "AL_PATH=$AL_PATH" >>config.build
+
+echo -n "Checking for OpenGLES..."
+if $TEST -e ${PREFIX}/include/EGL/egl.h ; then
+  EGL_PATH="${PREFIX}/include/EGL"
+fi
+echo "$EGL_PATH"
+echo "EGL_PATH=$EGL_PATH" >>config.build
+
+
+########################################
+
+# NOTE: even if we don't find a jdk java might still work
+if $TEST -z "$CROSS" ; then
+echo -n "Checking for JDK with preset envvars..."
+# Is this right?
+if $TEST -d "$JAVA_HOME" ; then
+  JDK_PATH=$JAVA_HOME
+fi
+# Is this right?
+if $TEST -d "$JRE_HOME" ; then
+  JDK_PATH=$JRE_HOME
+fi
+# Is this right?
+if $TEST -d "$JDK_HOME" ; then
+  JDK_PATH=$JDK_HOME
+fi
+#
+echo "$JDK_PATH"
+#
+echo -n "Checking for JDK with paths..."
+#if $TEST -e /java ; then 
+#  JDK_PATH="/java"
+#fi
+#
+##if $TEST -e /jdk1.3 ; then 
+#  JDK_PATH="/jdk1.3"
+#fi
+if $TEST -e ${PREFIX}/jdk ; then 
+  JDK_PATH="${PREFIX}/jdk"
+fi
+if $TEST -e ${PREFIX}/java ; then 
+  JDK_PATH="${PREFIX}/java"
+fi
+if $TEST -e ${PREFIX}/lib/java ; then 
+  JDK_PATH="${PREFIX}/lib/java"
+fi
+if $TEST -e ${PREFIX}/lib/jvm ; then 
+  JDK_PATH="${PREFIX}/lib/jvm"
+fi
+# Let this override anything else on Macs
+# NOTE: Apple moved it around a lot in different versions
+# NOTE: Rhapsody does not define MAC_HOST
+#if $TEST "$MAC_HOST" = "yes" ; then
+if $TEST -e /System/Library/Frameworks/JavaVM.framework/Home ; then 
+  JDK_PATH="/System/Library/Frameworks/JavaVM.framework/Home"
+fi
+if $TEST -e /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home ; then 
+  JDK_PATH="/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home"
+fi
+# TODO: Doesn't work if there's more than one installed...need to eval *
+if $TEST -e "/Library/Java/JavaVirtualMachines/*/Contents/Home" ; then 
+  JDK_PATH=/Library/Java/JavaVirtualMachines/*/Contents/Home
+fi
+#
+# TODO: Not actually a sun style jdk
+if $TEST -e /System/Library/Frameworks/JavaVM.framework/Versions/Current/Commands ; then 
+  JAVAHOME_PATH="/System/Library/Frameworks/JavaVM.framework/Versions/Current/Commands"
+fi
+#fi
+# TODO: Look in ${JDK_PATH}/default-java/bin?
+fi
+#
+#
+echo "JDK_PATH=$JDK_PATH" >>config.build
+echo "$JDK_PATH"
+echo "JAVAHOME_PATH=$JAVAHOME_PATH" >>config.build
+echo "$JAVAHOME_PATH"
+
+
+########################################
+
+# TODO: Crack $CROSS into cpu/system/release/platform
+if $TEST -n "$CROSS" ; then
+  TARGET_CPU=`echo $CROSS | sed -e 's/\(.*\)-.*-.*/\1/g'`
+  TARGET_SYSTEM=`echo $CROSS | sed -e 's/.*-.*-\(.*\)/\1/g'`
+  echo "TARGET_CPU=$TARGET_CPU" >>config.build
+  echo "TARGET_SYSTEM=$TARGET_SYSTEM" >>config.build
+  echo "TARGET_RELEASE=$TARGET_RELEASE" >>config.build
+else
+  echo "TARGET_CPU=$HOST_CPU" >>config.build
+  echo "TARGET_SYSTEM=$HOST_SYSTEM" >>config.build
+  echo "TARGET_RELEASE=$HOST_RELEASE" >>config.build
+fi
+
+if $TEST -z "$HOST_SYSTEM" ; then
+  echo "*************************************************"
+  echo "** WARNING! Unable to determine host system!!! **"
+  echo "*************************************************"
+  HOST_PLATFORM=unknown
+fi
+
+
+if $TEST "$TARGET_PLATFORM" ; then
+  echo "TARGET_PLATFORM already defined"
+else
+  TARGET_PLATFORM=$HOST_PLATFORM
+fi
+echo "TARGET_PLATFORM=$HOST_PLATFORM"
+echo "TARGET_PLATFORM=$TARGET_PLATFORM" >>config.build
+
+
+########################################
+
+#echo "---"
+#echo "Building dependencies...please wait..."
+#if $TEST "$DONT_USE_DEV_NULL" = "1"  ; then
+#  if $TEST "$MAC_HOST" = "yes" ; then
+#    $MAKE -ik fix
+#  fi
+#  $MAKE -ik remove_depends
+#  $MAKE -ik depend
+#else
+#  if $TEST "$MAC_HOST" = "yes" ; then
+#    $MAKE >&/dev/null -ik fix
+#  fi
+#  $MAKE >&/dev/null -ik remove_depends
+#  $MAKE >&/dev/null -ik depend
+#fi
+
+#echo "done."
+
