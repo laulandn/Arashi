@@ -10,5 +10,5 @@ jobs:
         uses: IQSS/dataverse-uploader@v1.4
         with:
           DATAVERSE_TOKEN: 7b583e58-af24-4a4b-a174-36c5101c14b3
-          DATAVERSE_SERVER: https://dataverse-training.tdl.org
-          DATAVERSE_DATASET_DOI: doi:10.33536/FK2/AUT34N
+          DATAVERSE_SERVER: https://dataverse-dev.tdl.org
+          DATAVERSE_DATASET_DOI: doi:10.33536/FK2/I4FM0R
