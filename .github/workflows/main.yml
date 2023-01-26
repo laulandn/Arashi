@@ -13,4 +13,4 @@ jobs:
           DATAVERSE_SERVER: https://dataverse-dev.tdl.org
           DATAVERSE_DATASET_DOI: doi:10.33536/FK2/I4FM0R
           DELETE: Yes
-          Publish: Yes
+          PUBLISH: Yes
