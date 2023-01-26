@@ -11,11 +11,7 @@ DIRS=$(wildcard */)
 ####################################################################
 
 all:
-#	$(foreach DIR,$(DIRS),$(MAKE) -i -C $(DIR) all;)
-	make -i -C nlib
-	make -i -C gamelib
-	make -i -C alib2n
-	make -i -C alib3n
+	$(foreach DIR,$(DIRS),$(MAKE) -i -C $(DIR) all;)
 
 #configure:
 #	$(foreach DIR,$(DIRS), cd $(DIR).;)
