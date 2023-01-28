@@ -8,6 +8,8 @@
      Copyright © 1987-1992, Juri Munkki
 /*/
 
+#include <Quickdraw.h>
+
 #include "VAInternal.h"
 #include "VA.h"
 
@@ -26,6 +28,8 @@
 int		VAClip(
 	Rect	*rp)
 {
+#ifdef DONT_USE_ASM
+#else
 asm	{	movem.l	D3-D7,-(sp)
 		move.l	rp,A0
 		
@@ -218,4 +222,5 @@ asm	{	movem.l	D3-D7,-(sp)
 @alldone
 		movem.l	(sp)+,D3-D7
 	}
+#endif
 }

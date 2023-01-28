@@ -12,6 +12,7 @@
 #include <Events.h>
 #include <Resources.h>
 #include <Processes.h>
+#include <TextUtils.h>
 
 #define		MAINOPTIONS
 #include	"VA.h"

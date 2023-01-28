@@ -18,6 +18,13 @@
 #include <Resources.h>
 
 
+extern void OpenStars(Handle Colors);
+extern void FeedStars(void);
+extern void RideStars(void);
+extern void CloseStars(void);
+extern int Getfontscale(void);
+
+
 #define PI 3.1415926535
 
 #define	FIELDADVANCE	8

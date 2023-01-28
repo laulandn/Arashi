@@ -11,6 +11,9 @@
 #include "VA.h"
 #include "STORM.h"
 
+#include "Shuddup.h"
+
+
 #define	ZOOMSTEPS	32
 #define	MAPPINGS	5
 

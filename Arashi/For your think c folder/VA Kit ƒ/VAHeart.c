@@ -10,6 +10,9 @@
      Copyright © 1989-1992, Juri Munkki
 /*/
 
+#include <Quickdraw.h>
+#include <Events.h>
+
 #include "VAInternal.h"
 #include "VA.h"
 
@@ -401,7 +404,6 @@ int		x1,y1,x2,y2;
 #ifdef ORIG_ARASHI
 	SwapMMUMode(&mode);
 #endif
-#else
 #ifdef NICK_NOT_QUICKDRAW
   unsigned int x,y;
   int hx,hy;
@@ -416,7 +418,6 @@ int		x1,y1,x2,y2;
   NICK_SET_LIGHT();
   NICK_MOVETO(x1,y1);
   NICK_LINETO(x2,y2);
-#endif
 #endif
 }
 

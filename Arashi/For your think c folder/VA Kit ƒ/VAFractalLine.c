@@ -8,6 +8,8 @@
      Copyright © 1991-1993, Juri Munkki
 /*/
 
+#include <Memory.h>
+
 #include "VA.h"
 
 static	char	*JitterP;

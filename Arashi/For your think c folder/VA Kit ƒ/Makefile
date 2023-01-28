@@ -1,5 +1,6 @@
 
-LIBNAME=$(shell basename $(shell pwd))
+#LIBNAME=$(shell basename $(shell pwd))
+LIBNAME=vakit
 LDNAME=lib$(LIBNAME)_static.a
 
 ####################################################################
@@ -11,7 +12,7 @@ PATH_TO_BASE=..
 include $(PATH_TO_BASE)/../Makefile.target
 include $(PATH_TO_BASE)/../Makefile.common
 
-EXTRA_FLAGS=-D_LATITUDE_=1 -DNSYS_X11=1 -I/Users/nick/more_src/mycarbon/CIncludes -I.
+EXTRA_FLAGS=-D_LATITUDE_=1 -DNSYS_X11=1 -DDONT_USE_ASM=1 -I/Users/nick/more_src/mycarbon/CIncludes -I. -I../../Game\ Source/jam\ src -I../Sound\ Kit\ ƒ 
 
 #LIBS=
 #EXTRA_FLAGS=-DNSYS_X11=1 -I/usr/X11R6.3/include
@@ -51,7 +52,7 @@ PROGRAMS=$(SIMPLE_PROGRAMS)
 all:
 	make $(OBJS)
 #	$(foreach DIR,$(DIRS),$(MAKE) -i -C $(DIR) all;)
-#	$(MAKE) $(LDNAME)
+	$(MAKE) $(LDNAME)
 #	$(MAKE) -i $(PROGRAMS)
 
 

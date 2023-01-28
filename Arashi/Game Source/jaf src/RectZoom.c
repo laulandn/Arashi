@@ -15,6 +15,12 @@
 #include "VA.h"
 #include "STORM.h"
 
+#include "Shuddup.h"
+
+
+extern int Getfontscale();
+
+
 #define	ZOOMSTEPS	20
 #define	MAPPINGS	5
 

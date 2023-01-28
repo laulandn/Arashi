@@ -11,6 +11,8 @@ PATH_TO_BASE=..
 include $(PATH_TO_BASE)/../Makefile.target
 include $(PATH_TO_BASE)/../Makefile.common
 
+EXTRA_FLAGS=-D_LATITUDE_=1 -DNSYS_X11=1 -DDONT_USE_ASM=1 -I/Users/nick/more_src/mycarbon/CIncludes -I.
+
 #LIBS=
 #EXTRA_FLAGS=-DNSYS_X11=1 -I/usr/X11R6.3/include
 #EXTRA_LDFLAGS=/usr/X11R6.3/lib/X11.framework/X11

@@ -17,7 +17,7 @@ void VAInitPhase2(void);
 void VAEraseBufferedLines(int count, Rect *lines);
 void VALoadExplosions(void);
 void VAInsertExplosions(void);
-void VABresenheim(int,int,int,int);
+void VABresenham(int,int,int,int);
 void VADrawBufferedLines(int count, Rect *lines, int *colors);
 void VAPlotPixels(int count, long *pixels, int *colors,int bnum);
 void VAErasePixels(int count, long *pixels,int bnum);

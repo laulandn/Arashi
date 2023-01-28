@@ -8,12 +8,21 @@
      Copyright © 1989-1995, Juri Munkki
 /*/
 
+#include <Resources.h>
+#include <Sound.h>
+
 #define	MAKE_SOUNDs
 #define	SOUNDKIT_MAIN
 #include <Sound.h>
 #include <Retrace.h>
 #include "Shuddup.h"
-#include <GestaltEqu.h>
+/*#include <GestaltEqu.h>*/
+#include <Gestalt.h>
+
+
+extern void DeCompress(void);
+extern void DecodeSounds(void);
+
 
 SndDoubleBufferHeader	SKDouble;
 SndChannelPtr			SKChannel;
@@ -31,7 +40,10 @@ int			OldSound=0;			/*	Change to 1 to use old sound driver.*/
 
 Ptr			SKPtr;				/*	Pointer for Sound Kit data.			*/
 SoundStuff	*Sounds;			/*	Storage for sound info table.		*/
+#ifdef NEW_MAC_SOUND_ONLY
+#else
 FFSynthPtr	SoundBuf;			/*	Our one and only FFSynthRec			*/
+#endif
 VVars		Vv;					/*	Vertical blanking variables			*/
 long		SKTicks;			/*	Tickcount from Sound Kit VBL.		*/
 
@@ -48,6 +60,8 @@ long		SKTicks;			/*	Tickcount from Sound Kit VBL.		*/
 */
 void	SKWorkHorse()
 {
+#ifdef DONT_USE_ASM
+#else
 asm	{
 		move.l	A2,-(sp)
 		move.l	VBV(SoundB),A0			;	Get address of sound buffer
@@ -126,6 +140,7 @@ asm	{
 		move.l	(sp)+,A2
 		return							;	Return from vbl routine
 	}
+#endif
 }
 
 /*
@@ -148,6 +163,8 @@ SndDoubleBuffer	*buf;
 
 	sdata=buf->dbSoundData;
 
+#ifdef DONT_USE_ASM
+#else
 asm	{	move.l	A5,-(sp)
 		move.l	VVFrame,A5
 		bsr		SKWorkHorse
@@ -174,6 +191,7 @@ asm	{	move.l	A5,-(sp)
 		
 		dbra	D0,@loop
 	}
+#endif
 }
 
 /*
@@ -185,6 +203,8 @@ void	InstallMyVBL()
 	register	long	vbltask;
 	register	Handle 	SystemHand;
 	
+#ifdef DONT_USE_ASM
+#else
 	asm	{
 		lea		@myvbltask,A0		;	Get address of vbltask
 		move.l	A0,vbltask			;	Store in local variable
@@ -192,6 +212,7 @@ void	InstallMyVBL()
 		lea		Vv,A1				;	Get addr of Vv record
 		move.l	A1,(A0)				;	Store base in base storage
 		}
+#endif
 	
 	SystemHand=GetResource(SKRESTYPE,SKSYSJUMP);
 	Vv.VBL.qType=vType;				/*	Vertical blanking queue.	*/
@@ -203,6 +224,9 @@ void	InstallMyVBL()
 	Vv.TickPtr=&SKTicks;			/*	Faster than TickCount()		*/
 	VInstall((void *)&Vv.VBL);		/*	Install task in queue		*/
 	if(0)
+#ifdef DONT_USE_ASM
+ ;
+#else
 asm	{	
 @myvbltask
 		move.l	A5,-(SP)				;	Save A5
@@ -308,6 +332,7 @@ asm	{
 @mybase
 		dc.l	0						;	Vv record address stored here.
 	}
+#endif
 }
 
 /*
@@ -325,7 +350,10 @@ void	CloseSoundKit()
 	{
 		if(OldSound)
 		{	VRemove((void *)&Vv.VBL);
+#ifdef NEW_MAC_SOUND_ONLY
+#else
 			StopSound();
+#endif
 		}
 		else
 		{	SndDisposeChannel(SKChannel,-1);
@@ -351,9 +379,12 @@ void	CloseSoundKit()
 void	SoundExitToShell()
 {
 	CloseSoundKit();
+#ifdef DONT_USE_ASM
+#else
 	asm	{	move.l	oldExit,A0
 			jmp		(A0)
 		}
+#endif
 }
 /*
 >>	Patch exittoshell to make sure that vbl routine is removed.
@@ -371,6 +402,8 @@ void	StartNoise()
 	register	long	*p;
 	register	int		i;
 
+#ifdef NEW_MAC_SOUND_ONLY
+#else
 	SoundBuf=(FFSynthPtr)NewPtr(700);	/*	Allocate buffer					*/
 	
 	p=(long *)SoundBuf;
@@ -378,12 +411,18 @@ void	StartNoise()
 
 	SoundBuf->mode=ffMode;				/*	Freeform (sampled) data			*/
 	SoundBuf->count=FixRatio(1,2);		/*	11 Khz sampling rate			*/
-
+#endif
 	Vv.SPar.ioRefNum=-4;				/*	Sound driver.					*/
+#ifdef NEW_MAC_SOUND_ONLY
+#else
 	Vv.SPar.ioBuffer=(Ptr)SoundBuf;		/*	FFSynthPtr stored here			*/
+#endif
 	Vv.SPar.ioReqCount=660;				/*	Play 660 bytes (At least)		*/
 	Vv.SPar.ioCompletion=0;				/*	No ioCompletion routine.		*/
+#ifdef NEW_MAC_SOUND_ONLY
+#else
 	Vv.SoundB=(void *)SoundBuf->waveBytes;/*	Store buffer start address		*/
+#endif
 	Vv.SoundP=0;						/*	Start with buffer at offset 0	*/
 
 	PBWrite(&Vv.SPar,-1);				/*	Start playing					*/

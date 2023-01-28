@@ -2,6 +2,9 @@
 **	Game over, Highscore handling		//Jaf © copyright 1991
 */
 
+#include <Events.h>
+#include <Resources.h>
+
 #include "Palettes.h"
 #include "VA.h"
 #include "STORM.h"
@@ -9,13 +12,22 @@
 #include "NewTitleEffect.h"
 #include "PlayOptions.h"
 
+#include "Shuddup.h"
+
+
+extern int Getfontscale(void);
+extern void Firework(void);
+extern void GameEvent(void);
+extern void Erase(int x1,int y1,int x2,int y2);
+
+
 #define GAMEOVERDELAY 60
 
 extern  int				MainStage;
 extern  int				SpecialEvent;
 extern  Initials		*HiScores;
 
-Highscores(score)
+void Highscores(score)
 long	score;
 {
 	int	i,ranking,ranky;

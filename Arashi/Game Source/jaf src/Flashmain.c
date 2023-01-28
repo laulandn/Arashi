@@ -4,6 +4,8 @@
 **
 */
 
+#include <Resources.h>
+
 #include "Palettes.h"
 #include "VA.h"
 #include "STORM.h"
@@ -15,7 +17,24 @@
 #include "GamePause.h"
 #include "NewTitleEffect.h"
 
-#include <GestaltEqu.h>
+/*#include <GestaltEqu.h>*/
+#include <Gestalt.h>
+
+extern void STLoadLevel(void);
+extern void GameEvent(void);
+extern void GamePause(int cleanup);
+extern void Firework(void);
+extern void CloseSoundKit(void);
+extern void DrawZoomer(void);
+extern void ReplaceASHI(void);
+extern void PlayDemoGame(void);
+extern void HighMain(void);
+extern void InitScale(void);
+extern int StormStart(void);
+
+
+extern void ResetGestalt(void);
+
 
 #define MAXINTENSITY 65535
 #define NEWINTENSITY 32767
@@ -84,7 +103,8 @@ void	DoCompleteGame()
 	}
 }
 
-void main() 
+
+int main(int argc,char **argv)
 {
 
 	long			endtime;
@@ -94,7 +114,7 @@ void main()
 	if(StormStart()){
 		ResetGestalt(); /* remove gestalt selectors */
  		ReplaceASHI();
-		return;
+		return -1;
 	}
 	
 	ThisLevel.lvNext = 1;
@@ -167,6 +187,7 @@ void main()
 	
  	ResetGestalt(); 
  	ReplaceASHI();
+  return 0;
 }
 	
 void MainTitle()
@@ -291,6 +312,7 @@ void MainTitle()
 	}
 }
 
+
 void InitZoomer() 
 {
  #ifdef ORIG_ARASHI
@@ -310,7 +332,7 @@ void InitZoomer()
 }	
 
 /* gets the maximum scale to print the STORM logo */
-InitScale()
+void InitScale(void)
 {
 	int scale;
 

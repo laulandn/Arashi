@@ -4,17 +4,26 @@
 
 /* va paketin numerot - scrollaus jos >40. SCROLLAUS */
 /* VA packet */
+
+#include <Resources.h>
+
 #include "VA.h"
 #include "Palettes.h"
 #include "Highscores.h"
 #include "Flash.h"
 #include "PlayOptions.h"
 
+
+extern int Getfontscale(void);
+extern void DisplayScores(void);
+
+
 Initials	*HiScores;
 extern int 	SpecialEvent;
 extern int  FireworksActive;
 
-HighMain() 
+
+void HighMain(void) 
 {
 	Handle	ScoreHand;
 		
@@ -30,9 +39,10 @@ HighMain()
 	DisplayScores();
 	SpecialEvent=DELAY;
 	FireworksActive=0;					/*    */
-}		
+}
+		
 
-DisplayScores()
+void DisplayScores(void)
 {
 	char	Pstring[255];
 	int		i,x,y,len;

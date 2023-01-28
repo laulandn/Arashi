@@ -13,9 +13,13 @@
 >>	data of Project STORM. It uses the Huffman algorithm.
 */
 
+#include <ToolUtils.h>
 #include "Huffman.h"
 #include "Shuddup.h"
+#ifdef DONT_USE_ASM
+#else
 #include "asm.h"
+#endif
 #include "LowMem.h"
 
 Handle	PlainHand;		/*	Handle to contain uncompressed sounds.	*/
@@ -85,10 +89,13 @@ void	OutputPhase()
 		{	while(bitpos<MsgBitSize)
 			{	data=codes[*SrcP];
 				bitwidth=lens[*SrcP++];
+#ifdef DONT_USE_ASM
+#else
 				asm	68020
 					{	BFINS	data,(OutP){bitpos:bitwidth}
 						add.l	bitwidth,bitpos
 					}
+#endif
 			}
 		}
 	}
@@ -432,6 +439,8 @@ void	DecodeSounds()
 		if(LMGetCPUFlag()<2)		/*	Check for processor type.				*/
 		{	while(len--)	/*	Version for 68000 and 68010 processors.	*/
 			{
+#ifdef DONT_USE_ASM
+#else
 				asm
 					{	cmp.b	#16,bitpos
 						blt.s	@nobitshift
@@ -444,10 +453,13 @@ void	DecodeSounds()
 						rol.l	D0,data
 						and.l	#((1<<QTBITS)-1),data
 					}
+#endif
 					TheNode=QTable[data];
 	
 				if(TheNode->typeflag)
 				{	bitpos+=QTBITS;
+#ifdef DONT_USE_ASM
+#else
 					asm	{
 					@begin0		cmp.b	#16,bitpos
 								blt.s	@nobitshifteither
@@ -468,6 +480,7 @@ void	DecodeSounds()
 								bne.s	@begin0
 					@loopdone0		
 					}
+#endif
 				}
 				else
 				{	bitpos+=TheNode->codelen;
@@ -494,14 +507,19 @@ void	DecodeSounds()
 		else	/*	Version for 68020, 68030, 68040 processors	*/
 		{	while(len--)
 			{
+#ifdef DONT_USE_ASM
+#else
 				asm	68020
 					{
 					bfextu	(MsgData){bitpos:QTBITS},data
 					}
+#endif
 					TheNode=QTable[data];
 	
 				if(TheNode->typeflag)
 				{	bitpos+=QTBITS;
+#ifdef DONT_USE_ASM
+#else
 					asm	68020
 					{
 					@begin
@@ -518,6 +536,7 @@ void	DecodeSounds()
 								bne.s	@begin
 					@loopdone		
 					}
+#endif
 				}
 				else
 				{	bitpos+=TheNode->codelen;

@@ -28,6 +28,9 @@ int		VARandom()
 
 int		VARandom()
 {
+#ifdef DONT_USE_ASM
+  return Random();
+#else
 asm	{
 		move.w	#0x41A7,D0
 		move.w	D0,D2
@@ -52,10 +55,14 @@ asm	{
 @positive
 		move.l	D0,VARandSeed
 	}
+#endif
 }
 
 int		FastRandom()
 {
+#ifdef DONT_USE_ASM
+  return Random();
+#else
 asm	{
 		move.w	#0x41A7,D0
 		move.w	D0,D2
@@ -80,5 +87,6 @@ asm	{
 @positive
 		move.l	D0,randSeed
 	}
+#endif
 }
 

@@ -342,7 +342,9 @@ int		x,y;
 {
 	register	Rect	*p;
 	register	int		flag;
-	
+
+#ifdef DONT_USE_ASM
+#else
 asm	{
 		moveq.l	#0,flag
 
@@ -373,6 +375,7 @@ asm	{
 		moveq.l	#-1,flag
 @outside
 	}
+#endif
 	if(flag)
 	if(VA.numlines[VA.curbuffer]<MAXSAVED)
 	{	VA.linecolors[VA.curbuffer][VA.numlines[VA.curbuffer]]=VA.color;

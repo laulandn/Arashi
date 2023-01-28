@@ -19,6 +19,8 @@
 >>	routine when (and if) it notices that it's not used.
 */
 
+#include <Resources.h>
+
 #include "Shuddup.h"
 
 
@@ -31,8 +33,8 @@ long	ftype;
 				long			len;
 	register	int				numfiles,i,numread;
 				int				ref;
-				volumeParam		volupram;
-				fileParam		filepram;
+				VolumeParam		volupram;
+				FileParam		filepram;
 				char			fname[256];
 	
 	sinfo=GetResource(SKRESTYPE,SKSTABLE);

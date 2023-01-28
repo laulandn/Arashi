@@ -20,6 +20,8 @@
 **	of these routines should be easy enough to write.
 */
 
+#include <Memory.h>
+
 #include "VA.h"
 #include "VAInternal.h"
 

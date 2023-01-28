@@ -16,6 +16,8 @@
 **	double buffering of the vector animation toolkit.
 */
 
+#include <Resources.h>
+
 #define VECTOR_ANIMATION_MAIN
 #define	 _VABUFFERS_
 #include <Palettes.h>
@@ -24,6 +26,12 @@
 #include "VA.h"
 #include "VAInternal.h"
 #include "Video.h"
+
+
+extern void VAInstallQDSearch(void);
+extern void VARemoveQDSearch(void);
+extern void VACreateColorMapping(void);
+
 
 #define	NO_VIDEO_BLANK_ROUTINE
 

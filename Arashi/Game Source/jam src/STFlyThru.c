@@ -37,6 +37,9 @@ extern void UpdateFlippers(void);
 extern void UpdatePulsars(void);
 extern void UpdateFloatingScores(void);
 
+extern void OpenStars(Handle Colors);
+extern void FieldRide(worldstruct *world, short fieldAdvance);
+
 
 #define	MSGDELAY 120	/* 2 seconds */
 

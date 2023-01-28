@@ -8,7 +8,18 @@
      Copyright © 1991-1993, Juri Munkki
 /*/
 
+#include <Windows.h>
+#include <Dialogs.h>
+#include <Resources.h>
+
 #include	"ScreenSelect.h"
+
+
+extern void CreateOptionsDialog(void);
+extern void CloseOptionsDialog(void);
+extern void OptionsUpdate(int ScreenAvailable);
+extern int DoStartupDialog(int item);
+
 
 #define		HILITEMODE	asm {	BCLR	#7,0x938	}
 
@@ -86,13 +97,20 @@ register	ScreenInfo	*info;
 	{	flag=GetMouseTrackEvent(&where);
 		if(state != (PtInRect(where,&info->window->portRect)))
 		{	state = !state;
+#ifdef DONT_USE_ASM
+#else
 			HILITEMODE;
+#endif
 			InvertRect(&info->window->portRect);
 		}
 	}	while(flag);
 	
 	if(state)
-	{	HILITEMODE;
+	{
+#ifdef DONT_USE_ASM
+#else
+	HILITEMODE;
+#endif
 		InvertRect(&info->window->portRect);
 	}
 	

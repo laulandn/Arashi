@@ -8,6 +8,8 @@
      Copyright © 1989-1992, Juri Munkki
 /*/
 
+#include <Resources.h>
+
 #include "VA.h"
 #include "VAInternal.h"
 

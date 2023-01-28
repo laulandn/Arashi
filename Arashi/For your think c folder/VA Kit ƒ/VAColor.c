@@ -8,6 +8,8 @@
      Copyright © 1991-1992, Juri Munkki
 /*/
 
+#include <Memory.h>
+
 #include "VA.h"
 
 static	int			*ColorMapping[2];
