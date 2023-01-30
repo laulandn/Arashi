@@ -21,7 +21,7 @@
 #define NICK_NOT_QUICKDRAW 1
 
 /* Uncomment to use 8 bit instead of 1 bit pixels in"new" drawing engine */
-/*#define NICK_256_NOT_1*/
+#define NICK_256_NOT_1
 
 
 /* Uncomment for "new" drawing engine to draw non-solid lines */

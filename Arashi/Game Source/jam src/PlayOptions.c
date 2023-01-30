@@ -18,12 +18,12 @@
 #include	"VA.h"
 #include	"PlayOptions.h"
 #include	"ScreenSelect.h"
-/*#include	<GestaltEqu.h>*/
-#include	<Gestalt.h>
+#include	<GestaltEqu.h>
+/*#include	<Gestalt.h>*/
 
 
 extern void MoreInfo(void);
-extern void ExitToShell(void);
+/*extern void ExitToShell(void);*/
 
 
 DialogPtr			StartDialog;

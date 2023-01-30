@@ -16,8 +16,8 @@
 #include <Sound.h>
 #include <Retrace.h>
 #include "Shuddup.h"
-/*#include <GestaltEqu.h>*/
-#include <Gestalt.h>
+#include <GestaltEqu.h>
+/*#include <Gestalt.h>*/
 
 
 extern void DeCompress(void);

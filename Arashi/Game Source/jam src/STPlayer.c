@@ -57,16 +57,16 @@ Handle			RecordedHandle;
 int		HeroShifts[]={ 1,2,3,4,4,5,6,7 };
 
 
+/*
 extern	Point			MTemp;
 extern	Point			RawMouse;
 extern	Point			Mouse;
 extern	int				CrsrNewCouple;
-/*
+*/
 extern	Point			MTemp			: 0x828;
 extern	Point			RawMouse		: 0x82c;
 extern	Point			Mouse			: 0x830;
 extern	int				CrsrNewCouple	: 0x8ce;
-*/
 
 
 extern	EventRecord		Event;

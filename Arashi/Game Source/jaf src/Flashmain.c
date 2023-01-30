@@ -17,8 +17,8 @@
 #include "GamePause.h"
 #include "NewTitleEffect.h"
 
-/*#include <GestaltEqu.h>*/
-#include <Gestalt.h>
+#include <GestaltEqu.h>
+/*#include <Gestalt.h>*/
 
 extern void STLoadLevel(void);
 extern void GameEvent(void);
@@ -31,6 +31,9 @@ extern void PlayDemoGame(void);
 extern void HighMain(void);
 extern void InitScale(void);
 extern int StormStart(void);
+
+
+int errno;
 
 
 extern void ResetGestalt(void);

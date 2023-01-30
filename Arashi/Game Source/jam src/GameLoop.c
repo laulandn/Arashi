@@ -14,8 +14,8 @@
 #include "PlayOptions.h"
 #include "GamePause.h"
 #include "HighScoresToBeat.h"		/* mz */
-/*#include <GestaltEqu.h>*/
-#include <Gestalt.h>
+#include <GestaltEqu.h>
+/*#include <Gestalt.h>*/
 #include <OSUtils.h>
 #include <Types.h>
 #include "heroflags.h"
@@ -246,7 +246,10 @@ int		Options;
 				VA.color = BG2;
 			}
 			VAStep();
+#ifdef ORIG_ARASHI
+#else
 			DrawField();
+#endif
 			
 			if(Hero.state == HeroPlaying)
 			{	if(ThisLevel.edgeCount==ThisLevel.totalCount)
