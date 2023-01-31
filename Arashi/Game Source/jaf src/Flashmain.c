@@ -1,6 +1,6 @@
 /*
 **  Titleanimation && Highscorelists. Main program
-**  Flashing effects, etc.		//Jaf © copyright 1991
+**  Flashing effects, etc.		//Jaf ï¿½ copyright 1991
 **
 */
 
@@ -17,8 +17,11 @@
 #include "GamePause.h"
 #include "NewTitleEffect.h"
 
+#ifdef GESTALTEQU_NOT_GESTALT
 #include <GestaltEqu.h>
-/*#include <Gestalt.h>*/
+#else
+#include <Gestalt.h>
+#endif
 
 extern void STLoadLevel(void);
 extern void GameEvent(void);

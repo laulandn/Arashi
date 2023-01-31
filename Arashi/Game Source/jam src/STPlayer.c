@@ -5,7 +5,7 @@
      Last modification: Friday, November 25, 1994, 6:06
      Created: Thursday, March 23, 1989, 23:15
 
-     Copyright © 1989-1994, Juri Munkki
+     Copyright ï¿½ 1989-1994, Juri Munkki
 /*/
 
 #include <Events.h>
@@ -57,17 +57,17 @@ Handle			RecordedHandle;
 int		HeroShifts[]={ 1,2,3,4,4,5,6,7 };
 
 
-/*
+#ifdef DONT_USE_LOWMEM
 extern	Point			MTemp;
 extern	Point			RawMouse;
 extern	Point			Mouse;
 extern	int				CrsrNewCouple;
-*/
+#else
 extern	Point			MTemp			: 0x828;
 extern	Point			RawMouse		: 0x82c;
 extern	Point			Mouse			: 0x830;
 extern	int				CrsrNewCouple	: 0x8ce;
-
+#endif
 
 extern	EventRecord		Event;
 

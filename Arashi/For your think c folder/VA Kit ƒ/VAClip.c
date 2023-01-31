@@ -5,7 +5,7 @@
      Last modification: Monday, November 2, 1992, 16:52
      Created: Friday, March 20, 1987, 17:24
 
-     Copyright © 1987-1992, Juri Munkki
+     Copyright ï¿½ 1987-1992, Juri Munkki
 /*/
 
 #include <Quickdraw.h>
@@ -29,6 +29,8 @@ int		VAClip(
 	Rect	*rp)
 {
 #ifdef DONT_USE_ASM
+  /* TODO Obviously this needs to be implemented */
+  return TRUE;
 #else
 asm	{	movem.l	D3-D7,-(sp)
 		move.l	rp,A0

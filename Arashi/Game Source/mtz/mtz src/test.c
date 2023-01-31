@@ -1,1 +1,1 @@
-#include <stdio.h>#include <Quickdraw.h>#include <VA.h>main(){ while(!Button()) 	printf("%d \n", VARandom() );}
+#include <stdio.h>#include <Quickdraw.h>#include <Events.h>#include <VA.h>main(){ while(!Button()) 	printf("%d \n", VARandom() );}

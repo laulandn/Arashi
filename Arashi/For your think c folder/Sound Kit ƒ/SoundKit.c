@@ -5,7 +5,7 @@
      Last modification: Thursday, August 31, 1995, 1:26
      Created: Saturday, March 18, 1989, 0:55
 
-     Copyright © 1989-1995, Juri Munkki
+     Copyright ï¿½ 1989-1995, Juri Munkki
 /*/
 
 #include <Resources.h>
@@ -16,8 +16,11 @@
 #include <Sound.h>
 #include <Retrace.h>
 #include "Shuddup.h"
+#ifdef GESTALTEQU_NOT_GESTALT
 #include <GestaltEqu.h>
-/*#include <Gestalt.h>*/
+#else
+#include <Gestalt.h>
+#endif
 
 
 extern void DeCompress(void);
