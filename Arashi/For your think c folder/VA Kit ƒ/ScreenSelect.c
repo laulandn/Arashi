@@ -56,7 +56,16 @@ void	CreateScreenWindows()
 #ifdef ORIG_ARASHI
 		Screens[NumScreens].status=(*(*GDev)->gdPMap)->pixelSize == 8;
 #else
-		Screens[NumScreens].status=1;
+#ifdef NICK_NOT_QUICKDRAW
+#ifdef NICK_256_NOT_1
+		Screens[NumScreens].status=(*(*GDev)->gdPMap)->pixelSize == 8;
+#else
+		Screens[NumScreens].status=(*(*GDev)->gdPMap)->pixelSize == 1;
+#endif
+#else
+    /* QuickDraw only version runs on any depth/screen */
+    Screens[NumScreens].status=1;
+#endif
 #endif
 		Screens[NumScreens].device=GDev;
 		Screens[NumScreens].window=NewWindow(0,&WindFrame,&zero,-1,plainDBox,(void *)-1,0,0);

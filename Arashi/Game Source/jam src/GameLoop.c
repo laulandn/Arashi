@@ -314,20 +314,21 @@ int		StormStart()
 		
 	DisableSuperClock(); 
 	
+#ifdef ORIG_ARASHI
 	/* Now do check for Color Quickdraw. Any version above simple 8 bit will do. */
-	/*if(Gestalt(gestaltQuickdrawVersion, &myFeature))
+	if(Gestalt(gestaltQuickdrawVersion, &myFeature))
 	{
 		ParamText("\pARASHI encountered an unrecoverable _GESTALT error.",nil,nil,nil);
 		Alert(131,0);
 		ExitToShell();
-	}*/
-	/*if (myFeature < gestalt8BitQD)
+	}
+	if (myFeature < gestalt8BitQD)
 	{
 		ParamText("\pARASHI requires Color Quickdraw and has not detected it in your System.",nil,nil,nil);
 		Alert(131,0);
 		ExitToShell();
-	}*/
-	
+	}
+#endif
 	
 	randSeed= TickCount();
 	VARandSeed= TickCount();
