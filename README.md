@@ -16,11 +16,11 @@ There is new drawing code to run in B&W only, on either 1 bit or 8 bit screens, 
 
 Files: Arashi 1.1.1 with modifications, compiles with Symantec C++ 7
 
-arashi1.1.0nl.img: DiskCopy 6.3 image. (May need to change type/creator to dimg/ddsk)
-arashi1.1.1nl.img: DiskCopy 6.3 image. (May need to change type/creator to dimg/ddsk)
++ arashi1.1.0nl.img: DiskCopy 6.3 image. (May need to change type/creator to dimg/ddsk)
++ arashi1.1.1nl.img: DiskCopy 6.3 image. (May need to change type/creator to dimg/ddsk)
 
-mvm-arashi-1.1.1-nl.dsk.zip: Mini vMac system disk image with same contents.
-mvm-arashi-1.1.0-nl.dsk.zip: Mini vMac system disk image with Arashi 1.1 and Think C 5
++ mvm-arashi-1.1.1-nl.dsk.zip: Mini vMac system disk image with same contents.
++ mvm-arashi-1.1.0-nl.dsk.zip: Mini vMac system disk image with Arashi 1.1 and Think C 5
 
 NOTE: The older Arashi 1.1.0 version is included as it compiles with Think C 5 (only) so can be built on older systems more easily.  Changes from 1.1.1 are backported, but will lag.
 
@@ -30,15 +30,15 @@ Many many bugs remain and this is a work in progress...
 
 Prebuilt binaries included in image(s):
 
-Arashi1.1.1: Original unpatched from macintoshgarden.org
++ Arashi1.1.1: Original unpatched from macintoshgarden.org
 
-Arashi1.1.1bw: Whatever my latest build is, may be unstable/crash.
++ Arashi1.1.1bw: Whatever my latest build is, may be unstable/crash.
 
-Arashi1.1.1bw_1bit: "New" graphics routines only runs on 1 bit depth screens.
++ Arashi1.1.1bw_1bit: "New" graphics routines only runs on 1 bit depth screens.
 
-Arashi1.1.1bw_8bit: "New" graphics routines only runs on 8 bit depth screens.
++ Arashi1.1.1bw_8bit: "New" graphics routines only runs on 8 bit depth screens.
 
-Arashi1.1.1bw_qd: Pure QuickDraw, should run on any hardware, but much slower.
++ Arashi1.1.1bw_qd: Pure QuickDraw, should run on any hardware, but much slower.
 
 ======
 
