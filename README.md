@@ -14,7 +14,7 @@ This repo is a fork of the 1.1.1 codebase that has been modified to no longer re
 
 There is new drawing code to run in B&W only, on either 1 bit or 8 bit screens, using the frame buffer directly, or strictly using QuickDraw, which should run on any display.
 
-Files: Arashi 1.1.1 with modifications, compiles with Symantec C++ 7
++ Files: Arashi 1.1.1 with modifications, compiles with Symantec C++ 7
 
 + arashi1.1.0nl.img: DiskCopy 6.3 image. (May need to change type/creator to dimg/ddsk)
 + arashi1.1.1nl.img: DiskCopy 6.3 image. (May need to change type/creator to dimg/ddsk)
